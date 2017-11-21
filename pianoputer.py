@@ -79,13 +79,18 @@ def main():
     # Parse command line arguments
     (args, parser) = parse_arguments()
 
+    keys = [l.split(" ") for l in args.keyboard.read().split('\n') ]
+    from pprint import pprint
+    pprint(keys)
+    
+
     # Enable warnings from scipy if requested
     if not args.verbose:
         warnings.simplefilter('ignore')
 
     fps, sound = wavfile.read(args.wav.name)
 
-    tones = range(-25, 25)
+    tones = range(-10, 25)
     sys.stdout.write('Transponding sound file... ')
     sys.stdout.flush()
     transposed_sounds = [pitchshift(sound, n) for n in tones]
@@ -96,10 +101,14 @@ def main():
     # For the focus
     screen = pygame.display.set_mode((150, 150))
 
-    keys = args.keyboard.read().split('\n')
     sounds = map(pygame.sndarray.make_sound, transposed_sounds)
-    key_sound = dict(zip(keys, sounds))
-    is_playing = {k: False for k in keys}
+    key_sound = dict()
+    for sound,somekeys in zip(sounds,keys): #sounds
+        for key in somekeys:
+            key_sound[key]=sound
+
+    pprint(key_sound)
+    is_playing = {k: False for k in key_sound.keys()}
 
     while True:
         event = pygame.event.wait()
